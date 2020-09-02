@@ -1,0 +1,12 @@
+.DS_Store
+node_modules
+yarn-error.log
+/__sapper__
+.vscode
+/static/global.css
+.env
+yarn.lock
+package-lock.json
+src-tauri/target
+src-tauri/WixTools
+src-tauri/Cargo.lock
