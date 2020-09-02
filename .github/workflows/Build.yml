@@ -55,3 +55,4 @@ jobs:
           add: .
           # The name of the user that will be displayed as the author of the commit
           author_name: Actions
+          ref: gh-pages
