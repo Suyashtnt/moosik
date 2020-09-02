@@ -9,9 +9,11 @@ import './styles/index.css';
 
 const { PORT, NODE_ENV } = process.env;
 const dev = NODE_ENV === 'development';
+const url = !dev ? 'moosik' : '/'
 
 polka()
   .use(
+    url,
     compression({ threshold: 0 }),
     sirv('static', { dev }),
     sapper.middleware({
