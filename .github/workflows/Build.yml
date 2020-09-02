@@ -21,15 +21,12 @@ jobs:
         with:
           node-version: 12.x
 
-      - name: Yarn install
-        uses: Borales/actions-yarn@v2.3.0
-        with:
-          cmd: install
+      - name: npm install
+        run: npm ci
     
       - name: Sapper export
-        uses: Borales/actions-yarn@v2.3.0
-        with:
-          cmd: export  
+        run: npm run export
+          
       - name: Upload a Build Artifact
         uses: actions/upload-artifact@v2.1.4
         with:
