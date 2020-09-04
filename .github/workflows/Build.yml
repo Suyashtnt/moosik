@@ -21,11 +21,8 @@ jobs:
         with:
           node-version: 12.x
 
-      - name: npm install
-        run: npm ci
-    
-      - name: Sapper export
-        run: npm run export
+      - name: install depends and buld
+        run: yarn && yarn export
           
       - name: Upload a Build Artifact
         uses: actions/upload-artifact@v2.1.4
@@ -56,3 +53,38 @@ jobs:
           # The name of the user that will be displayed as the author of the commit
           author_name: Actions
           ref: gh-pages
+  publish-tauri:
+     strategy:
+       fail-fast: false
+       matrix:
+         platform: [macos-latest, ubuntu-latest, windows-latest]
+
+     runs-on: ${{ matrix.platform }}
+     steps:
+     - uses: actions/checkout@v2
+     - name: setup node
+       uses: actions/setup-node@v1
+       with:
+         node-version: 12
+     - name: install Rust stable
+       uses: actions-rs/toolchain@v1
+       with:
+         toolchain: stable
+     - name: install tauri bundler
+       run: cargo install tauri-bundler --force
+     - name: install webkit2gtk (ubuntu only)
+       if: matrix.platform == 'ubuntu-latest'
+       run: |
+         sudo apt-get update
+         sudo apt-get install -y webkit2gtk-4.0
+     - name: install app dependencies and build it
+       run: yarn && yarn export
+     - uses: tauri-apps/tauri-action@v0
+       env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+       with:
+         tagName: app-v__VERSION__ # the action automatically replaces \_\_VERSION\_\_ with the app version
+         releaseName: "App v__VERSION__"
+         body: "See the assets to download this version and install."
+         draft: true
+         prerelease: false
