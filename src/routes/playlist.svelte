@@ -7,7 +7,7 @@ import { onMount } from 'svelte';
   //@ts-ignore
   let db:firebase.firestore.Firestore;
   let googleProvider;
-  let user: firebase.User
+  let user: firebase.auth.UserCredential
   onMount(() => {
     //@ts-ignore
     db = firebase.firestore();
@@ -66,6 +66,7 @@ import { onMount } from 'svelte';
 
           function error() {
             element.removeEventListener('ended', ended);
+            //@ts-ignore
             rej(err);
           }
           element.addEventListener('ended', ended, {
@@ -90,7 +91,7 @@ import { onMount } from 'svelte';
           //@ts-ignore
             firebase.auth().signInWithPopup(googleProvider).then((res) => {
                 console.log(res);
-                user = res.user
+                user = res
                 cookies.setCookie("userID", res.user.uid, 100000)
             });
         } catch(e) {
@@ -129,7 +130,7 @@ import { onMount } from 'svelte';
 </svelte:head>
 
 {#if user}
-<h1>{user.uid}</h1>
+<h1>{user.user.uid}</h1>
 <div class="w-full center clearfix">
   <form class="bg-white shadow-md clearfix rounded px-8 pt-6 pb-8 mb-4">
     <div class="mb-4">
