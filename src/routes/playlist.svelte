@@ -1,6 +1,19 @@
-<script>
-  import VirtualList from '@sveltejs/svelte-virtual-list';
+<script lang="ts">
+  import * as cookies from '../cookiehandler'
+	import type * as firebase from 'firebase/app';
+import { onMount } from 'svelte';
   import ProfileCard from '../components/ProfileCard.svelte';
+
+  //@ts-ignore
+  let db:firebase.firestore.Firestore;
+  let googleProvider;
+  let user: firebase.User
+  onMount(() => {
+    //@ts-ignore
+    db = firebase.firestore();
+    //@ts-ignore
+    googleProvider = new firebase.auth.GoogleAuthProvider();
+  })
 
   var songList = [];
   var url;
@@ -24,8 +37,8 @@
   }
 
   async function PlaySong(Info) {
-    const audio = new Audio(await Info.detail.url);
-    await audio.play();
+  const audio = new Audio(await Info.detail.url);
+  await audio.play();
   }
 
   async function addSong(URL) {
@@ -70,6 +83,35 @@
     var match = url.match(regExp);
     return match && match[7].length == 11 ? match[7] : false;
   }
+
+  async function login() {
+ 
+        try {
+          //@ts-ignore
+            firebase.auth().signInWithPopup(googleProvider).then((res) => {
+                console.log(res);
+                user = res.user
+                cookies.setCookie("userID", res.user.uid, 100000)
+            });
+        } catch(e) {
+            let message = e.message || e;
+            console.log("Something went wrong:", message);
+        }
+      
+    }
+
+    async function updateList() {
+      console.log("updating...");
+      
+      await db.collection("Playlists").add({
+        Songs: songList
+      }).then(function(docRef) {
+    console.log("Document written with ID: ", docRef.id);
+      })
+      .catch(function(error) {
+          console.error("Error adding document: ", error);
+      });
+    }
 </script>
 
 <style lang="sass">
@@ -86,6 +128,8 @@
   <title>Playlist</title>
 </svelte:head>
 
+{#if user}
+<h1>{user.uid}</h1>
 <div class="w-full center clearfix">
   <form class="bg-white shadow-md clearfix rounded px-8 pt-6 pb-8 mb-4">
     <div class="mb-4">
@@ -111,6 +155,14 @@
     <button
       on:click={e => {
         e.preventDefault();
+        updateList();
+      }}
+      class="btn btn-primary mt-2 float-left">
+      Update List
+    </button>
+    <button
+      on:click={e => {
+        e.preventDefault();
         PlayAll();
       }}
       class="btn btn-primary mt-2 float-right">
@@ -121,3 +173,9 @@
 {#each songList as song}
   <ProfileCard {...song} on:play={PlaySong} />
 {/each}
+
+{:else}
+
+<button on:click={login}>login</button>
+
+{/if}

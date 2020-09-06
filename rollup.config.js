@@ -52,7 +52,8 @@ export default {
       }),
       resolve({
         browser: true,
-        dedupe
+        dedupe,
+        mainFields: ['main']
       }),
       commonjs(),
       json(),

@@ -26,6 +26,26 @@
        because `app/client.js` references it -->
     <div id="app">%sapper.html%</div>
 
+      <script src="https://www.gstatic.com/firebasejs/7.19.1/firebase-app.js"></script>
+      <script src="https://www.gstatic.com/firebasejs/7.19.1/firebase-auth.js"></script>
+      <script src="https://www.gstatic.com/firebasejs/7.19.1/firebase-firestore.js"></script>
+
+
+      <script>
+         const firebaseConfig = {
+               apiKey: "AIzaSyBs14EuMaCF6UWnpsQSFpJGLTLkIjYss6s",
+               authDomain: "moosik-d964d.firebaseapp.com",
+               databaseURL: "https://moosik-d964d.firebaseio.com",
+               projectId: "moosik-d964d",
+               storageBucket: "moosik-d964d.appspot.com",
+               messagingSenderId: "709342900862",
+               appId: "1:709342900862:web:0a5cda0d81bb6605e95e2f",
+               measurementId: "G-7WC63VLDFB"
+            };
+
+            firebase.initializeApp(firebaseConfig);
+      </script>
+
     <!-- Sapper creates a <script> tag containing `app/client.js`
        and anything else it needs to hydrate the app and
        initialise the router -->
