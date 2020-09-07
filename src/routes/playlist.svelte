@@ -104,10 +104,10 @@ import { onMount } from 'svelte';
     async function updateList() {
       console.log("updating...");
       
-      await db.collection("Playlists").add({
+      db.collection("playlists").doc(user.user.uid).set({
         Songs: songList
-      }).then(function(docRef) {
-    console.log("Document written with ID: ", docRef.id);
+      }).then((docRef) => {
+    console.log("Document written with ID:");
       })
       .catch(function(error) {
           console.error("Error adding document: ", error);
