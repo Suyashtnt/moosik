@@ -15,6 +15,7 @@
   let saving: Boolean
   let saved: Boolean
   let GettingSong: Boolean
+  let DownloadingPlaylist: Boolean
   onMount(() => {
     //@ts-ignore
     googleProvider = new firebase.auth.GoogleAuthProvider();
@@ -138,7 +139,8 @@
   }
 
   async function downloadList() {
-    console.log("downloading" + JSON.stringify({
+    DownloadingPlaylist = true
+    console.log("downloading " + JSON.stringify({
         uid: `${user.user.uid}`
       }));
     const res = await axios.post('http://moosik-backend.herokuapp.com/playlist/get',
@@ -147,8 +149,8 @@
     })
     const json = await res.data 
     console.log(await json);
+    DownloadingPlaylist = false
     songList = await json.Songs
-
   }
 </script>
 
@@ -228,6 +230,9 @@
   </div>
   {#if GettingSong}
   <h1 class="text-center">Getting song...</h1>
+  {/if}
+  {#if DownloadingPlaylist}
+  <h1>Downloading your playlist</h1>
   {/if}
   {#if saving}
   <h1 class="text-center">saving...</h1>
