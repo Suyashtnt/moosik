@@ -10,10 +10,7 @@
   let user: firebase.auth.UserCredential;
   let currentlyAuthenticating: Boolean;
   let authError: String
-  let saving: Boolean
-  let saved: Boolean
-  let GettingSong: Boolean
-  let DownloadingPlaylist: Boolean
+  let state: String
   let URLList: String[] = []
   onMount(() => {
     //@ts-ignore
@@ -25,9 +22,11 @@
 
   async function addSong(URL: String) {
     URLList = [...URLList, URL] 
+    state = "getting song..."
     var song = await getSongInfo(URL);
 
     songList = [...songList, await song];
+    state = null
     console.log(songList);
   }
 
@@ -74,7 +73,7 @@
 
   async function updateList() {
     console.log("updating...");
-    saving = true
+     state = "saving"
     const res = await fetch('https://moosik-backend.herokuapp.com/playlist/post', {
       method: "POST",
         body: JSON.stringify({
@@ -82,13 +81,12 @@
           "Songs": URLList
         })
     }).then(() => {
-      saving = false
-      saved = true
+      state = "saved!"
     })
   }
 
   async function downloadList() {
-    DownloadingPlaylist = true
+    state = "downloading Playlist..."
     console.log("downloading " + JSON.stringify({
         uid: user.user.uid
       }));
@@ -107,7 +105,7 @@
      const json = await res.json() as APIResponse
      console.log(json)
      await addSongList(json.Songs)
-     DownloadingPlaylist = false
+     state = null
   }
 </script>
 
@@ -124,8 +122,6 @@
 
 <svelte:head>
   <title>Playlist</title>
-  <script src="https://www.gstatic.com/firebasejs/7.19.1/firebase-app.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/7.19.1/firebase-auth.js"></script>
 </svelte:head>
 
 {#if user}
@@ -188,29 +184,17 @@
     </form>
   </div>
 
-  {#if GettingSong}
-    <h1 class="text-center title2">Getting song...</h1>
-  {/if }
-
-  {#if DownloadingPlaylist}
-    <h1 class="text-center title2">Downloading your playlist</h1>
-  {/if}
-
-  {#if saving}
-    <h1 class="text-center title2">saving...</h1>
-  {/if}
-
-  {#if saved}
-    <h1 class="text-center title2">saved!</h1>
+  {#if state}
+  <h1 class="text-center title2">{state}</h1>
   {/if}
 
   {#each songList as song}
     <ProfileCard {...song} />
   {/each}
 
+
 {:else if currentlyAuthenticating}
 <h1 class="text-center title2">authenticating...</h1>
-
 {:else}
 
 {#if authError}
