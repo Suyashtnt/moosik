@@ -18,22 +18,22 @@
   let errorSaving: Boolean
   let ErrorWhileSaving: String
   let GettingSong: Boolean
-  let DownloadingPlaylist: Boolean  
+  let DownloadingPlaylist: Boolean
   onMount(() => {
     //@ts-ignore
     googleProvider = new firebase.auth.GoogleAuthProvider();
   })
 
   var songList = [];
-  var url;  
+  var url;
 
   async function getSongInfo(VideoURL) {
     GettingSong = true
     const id = youtube_parser(VideoURL);
     console.log(id);
     console.log(`https://www.yt-mp3s.com/@api/json/mp3/${id}`);
-    
-    
+
+
     try {
       const response = await axios.get(`https://www.yt-mp3s.com/@api/json/mp3/${id}`, {
       method: 'GET',
@@ -126,7 +126,7 @@
             console.log("Something went wrong:", message);
             authError = message
         }
-      
+
   }
 
   async function updateList() {
@@ -162,9 +162,9 @@
 </script>
 
 <style lang="sass">
-.center 
-  margin: auto 
-  width: 70% 
+.center
+  margin: auto
+  width: 70%
   padding: 10px
 .clearfix
   overflow: auto
@@ -255,7 +255,7 @@
   {#if saved}
     <h1 class="text-center title2"> saved! </h1>
   {/if}
-  
+
   {#each songList as song}
     <ProfileCard {...song} on:play={PlaySong} />
   {/each}
