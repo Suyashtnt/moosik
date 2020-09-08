@@ -4,6 +4,3 @@ yarn-error.log
 /__sapper__
 .vscode
 /static/global.css
-src-tauri/target
-src-tauri/WixTools
-src-tauri/Cargo.lock

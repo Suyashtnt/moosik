@@ -1,3 +1,4 @@
+import typescript from '@rollup/plugin-typescript';
 import babel from 'rollup-plugin-babel';
 import commonjs from 'rollup-plugin-commonjs';
 import json from 'rollup-plugin-json';
@@ -7,8 +8,10 @@ import replace from 'rollup-plugin-replace';
 import svelte from 'rollup-plugin-svelte';
 import { terser } from 'rollup-plugin-terser';
 import config from 'sapper/config/rollup.js';
-import pkg from './package.json';
 import sveltePreprocess from 'svelte-preprocess';
+
+import pkg from './package.json';
+
 const mode = process.env.NODE_ENV;
 const dev = mode === 'development';
 const legacy = !!process.env.SAPPER_LEGACY_BUILD;
@@ -18,7 +21,7 @@ const onwarn = (warning, onwarn) =>
     /[/\\]@sapper[/\\]/.test(warning.message)) ||
   onwarn(warning);
 
-const dedupe = importee =>
+const dedupe = (importee) =>
   importee === 'svelte' || importee.startsWith('svelte/');
 
 const purgecss = require('@fullhuman/postcss-purgecss')({
@@ -26,13 +29,13 @@ const purgecss = require('@fullhuman/postcss-purgecss')({
   content: ['./src/**/*.html', './src/**/*.svelte', './src/**/*.css'],
 
   // Include any special characters you're using in this regular expression
-  defaultExtractor: content => content.match(/[A-Za-z0-9-_:/]+/g) || []
+  defaultExtractor: (content) => content.match(/[A-Za-z0-9-_:/]+/g) || [],
 });
 
 const preprocess = sveltePreprocess({
   postcss: {
-    plugins: [require('postcss-import')(), require('postcss-nested')()]
-  }
+    plugins: [require('postcss-import')(), require('postcss-nested')()],
+  },
 });
 
 export default {
@@ -42,51 +45,28 @@ export default {
     plugins: [
       replace({
         'process.browser': true,
-        'process.env.NODE_ENV': JSON.stringify(mode)
+        'process.env.NODE_ENV': JSON.stringify(mode),
       }),
-      svelte({
-        preprocess,
-        dev,
-        hydratable: true,
-        emitCss: true
-      }),
-      resolve({
-        browser: true,
-        dedupe
-      }),
+      svelte({ preprocess, dev, hydratable: true, emitCss: true }),
+      resolve({ browser: true, dedupe, mainFields: ['main'] }),
       commonjs(),
       json(),
-
+      typescript(),
       legacy &&
         babel({
           extensions: ['.js', '.mjs', '.html', '.svelte'],
           runtimeHelpers: true,
           exclude: ['node_modules/@babel/**'],
-          presets: [
-            [
-              '@babel/preset-env',
-              {
-                targets: '> 0.25%, not dead'
-              }
-            ]
-          ],
+          presets: [['@babel/preset-env', { targets: '> 0.25%, not dead' }]],
           plugins: [
             '@babel/plugin-syntax-dynamic-import',
-            [
-              '@babel/plugin-transform-runtime',
-              {
-                useESModules: true
-              }
-            ]
-          ]
+            ['@babel/plugin-transform-runtime', { useESModules: true }],
+          ],
         }),
 
-      !dev &&
-        terser({
-          module: true
-        })
+      !dev && terser({ module: true }),
     ],
-    onwarn
+    onwarn,
   },
 
   server: {
@@ -95,13 +75,9 @@ export default {
     plugins: [
       replace({
         'process.browser': false,
-        'process.env.NODE_ENV': JSON.stringify(mode)
+        'process.env.NODE_ENV': JSON.stringify(mode),
       }),
-      svelte({
-        preprocess,
-        generate: 'ssr',
-        dev
-      }),
+      svelte({ preprocess, generate: 'ssr', dev }),
       postcss({
         extract: './static/global.css',
         plugins: [
@@ -109,25 +85,22 @@ export default {
           require('tailwindcss'), // See tailwind.config.js
           require('autoprefixer'),
           require('postcss-fail-on-warn'),
-          // Do not purge the CSS in dev mode to be able to play with classes in the browser dev-tools.
+          // Do not purge the CSS in dev mode to be able to play with
+          // classes in the browser dev-tools.
           !dev && purgecss,
-          !dev &&
-            require('cssnano')({
-              preset: 'default'
-            })
-        ].filter(Boolean)
+          !dev && require('cssnano')({ preset: 'default' }),
+        ].filter(Boolean),
       }),
-      resolve({
-        dedupe
-      }),
+      resolve({ dedupe }),
       commonjs(),
-      json()
+      json(),
+      typescript(),
     ],
     external: Object.keys(pkg.dependencies).concat(
       require('module').builtinModules ||
         Object.keys(process.binding('natives'))
     ),
-    onwarn
+    onwarn,
   },
 
   serviceworker: {
@@ -137,11 +110,11 @@ export default {
       resolve(),
       replace({
         'process.browser': true,
-        'process.env.NODE_ENV': JSON.stringify(mode)
+        'process.env.NODE_ENV': JSON.stringify(mode),
       }),
       commonjs(),
-      !dev && terser()
+      !dev && terser(),
     ],
-    onwarn
-  }
+    onwarn,
+  },
 };
