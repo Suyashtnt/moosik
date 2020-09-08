@@ -1,7 +1,12 @@
 {
   "compilerOptions": {
-    "typeRoots": ["types"],
-    "types": ["svelte", "@sapper"],
+    "typeRoots": [
+      "types"
+    ],
+    "types": [
+      "svelte",
+      "@sapper"
+    ],
     "allowSyntheticDefaultImports": true,
     "target": "ES2017"
   }
