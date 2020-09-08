@@ -8,7 +8,10 @@
   //@ts-ignore
   let db:firebase.firestore.Firestore;
   let googleProvider;
-  let user: firebase.auth.UserCredential
+  let user: firebase.auth.UserCredential;
+  let currentlyAuthenticating: Boolean;
+  let erroredDuringAuth: Boolean
+  let authError: String
   onMount(() => {
     //@ts-ignore
     googleProvider = new firebase.auth.GoogleAuthProvider();
@@ -35,8 +38,8 @@
   }
 
   async function PlaySong(Info) {
-  const audio = new Audio(await Info.detail.url);
-  await audio.play();
+    const audio = new Audio(await Info.detail.url);
+    await audio.play();
   }
 
   async function addSong(URL) {
@@ -86,15 +89,24 @@
   async function login() {
  
         try {
+          currentlyAuthenticating = true
+          erroredDuringAuth = false
           //@ts-ignore
             firebase.auth().signInWithPopup(googleProvider).then((res) => {
                 console.log(res);
                 user = res
                 cookies.setCookie("userID", res.user.uid, 100000)
+            }).then(() => currentlyAuthenticating = false).catch((err) => {
+              erroredDuringAuth = true
+              currentlyAuthenticating = false
+              authError = err
             });
         } catch(e) {
+          currentlyAuthenticating = false
+          erroredDuringAuth = true
             let message = e.message || e;
             console.log("Something went wrong:", message);
+            authError = message
         }
       
   }
@@ -142,70 +154,76 @@
 </svelte:head>
 
 {#if user}
-<img src={user.user.photoURL} alt="your profile pic" class="rounded-full mx-auto mt-6 w-20 h-20 " />
-<h1 class="text-center text-lg title mx-auto mt-2">{user.user.displayName}</h1>
-<div class="w-full center clearfix">
-  <form class="bg-white shadow-md clearfix rounded px-8 pt-6 pb-8 mb-4">
-    <div class="mb-4">
-      <label class="block text-gray-700 text-sm font-bold mb-2" for="username">
-        URL
-      </label>
-      <input
-        bind:value={url}
-        class="shadow appearance-none border rounded w-full py-2 px-3
-        text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-        id="username"
-        type="text"
-        placeholder="Youtube Video URL" />
-    </div>
+  <img src={user.user.photoURL} alt="your profile pic" class="rounded-full mx-auto mt-6 w-20 h-20 " />
+  <h1 class="text-center text-lg title mx-auto mt-2">{user.user.displayName}</h1>
+  <div class="w-full center clearfix">
+    <form class="bg-white shadow-md clearfix rounded px-8 pt-6 pb-8 mb-4">
+      <div class="mb-4">
+        <label class="block text-gray-700 text-sm font-bold mb-2" for="username">
+          URL
+        </label>
+        <input
+          bind:value={url}
+          class="shadow appearance-none border rounded w-full py-2 px-3
+          text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+          id="username"
+          type="text"
+          placeholder="Youtube Video URL" />
+      </div>
 
-    <div class="justify-evenly items-center content-center self-center">
+      <div class="justify-evenly items-center content-center self-center">
 
-      <button
+        <button
+          on:click={e => {
+            e.preventDefault();
+            addSong(url);
+          }}
+          class="btn btn-primary mt-2">
+          Add to playlist
+        </button>
+
+        <button
+          on:click={e => {
+            e.preventDefault();
+            updateList();
+          }}
+          class="btn btn-primary mt-2">
+          Update List
+        </button>
+
+        <button
         on:click={e => {
           e.preventDefault();
-          addSong(url);
+          downloadList();
         }}
         class="btn btn-primary mt-2">
-        Add to playlist
-      </button>
+        download list
+        </button>
 
-      <button
-        on:click={e => {
-          e.preventDefault();
-          updateList();
-        }}
-        class="btn btn-primary mt-2">
-        Update List
-      </button>
+        <button
+          on:click={e => {
+            e.preventDefault();
+            PlayAll();
+          }}
+          class="btn btn-primary mt-2">
+          Play all
+        </button>
 
-      <button
-      on:click={e => {
-        e.preventDefault();
-        downloadList();
-      }}
-      class="btn btn-primary mt-2">
-      download list
-      </button>
+      </div>
+    </form>
+  </div>
+  {#each songList as song}
+    <ProfileCard {...song} on:play={PlaySong} />
+  {/each}
 
-      <button
-        on:click={e => {
-          e.preventDefault();
-          PlayAll();
-        }}
-        class="btn btn-primary mt-2">
-        Play all
-      </button>
-
-    </div>
-  </form>
-</div>
-{#each songList as song}
-  <ProfileCard {...song} on:play={PlaySong} />
-{/each}
+{:else if currentlyAuthenticating}
+<h1>authenticating...</h1>
 
 {:else}
 
+{#if erroredDuringAuth}
+  <h1>{authError}</h1>
+{/if}
 <button on:click={login}>login</button>
 
 {/if}
