@@ -12,6 +12,9 @@
   let currentlyAuthenticating: Boolean;
   let erroredDuringAuth: Boolean
   let authError: String
+  let saving: Boolean
+  let saved: Boolean
+  let GettingSong: Boolean
   onMount(() => {
     //@ts-ignore
     googleProvider = new firebase.auth.GoogleAuthProvider();
@@ -21,20 +24,31 @@
   var url;  
 
   async function getSongInfo(VideoURL) {
+    GettingSong = true
     const id = youtube_parser(VideoURL);
     console.log(id);
     console.log(`https://www.yt-mp3s.com/@api/json/mp3/${id}`);
-    const response = await axios.get(`https://www.yt-mp3s.com/@api/json/mp3/${id}`, {
+    
+    
+    try {
+      const response = await axios.get(`https://www.yt-mp3s.com/@api/json/mp3/${id}`, {
       method: 'GET',
       headers: {}
-    })
-    const json = await response.data
-    const parsedUrl = await json.vidInfo[0].dloadUrl;
-    const name = await json.vidTitle;
-    const thumb = await json.vidThumb;
-    const info = { parsedUrl, name, thumb, VideoURL };
-    console.log(info);
-    return info;
+      })
+      const json = await response.data  
+      const parsedUrl = await json.vidInfo[0].dloadUrl;
+      const name = await json.vidTitle;
+      const thumb = await json.vidThumb;
+      const info = { parsedUrl, name, thumb, VideoURL };
+      GettingSong = false
+      console.log(info);
+      return info;
+    } catch (err) {
+      GettingSong = false
+      return err
+    }
+
+
   }
 
   async function PlaySong(Info) {
@@ -87,7 +101,7 @@
   }
 
   async function login() {
- 
+
         try {
           currentlyAuthenticating = true
           erroredDuringAuth = false
@@ -113,14 +127,14 @@
 
   async function updateList() {
     console.log("updating...");
-    
-      const res = await axios.post('https://moosik-backend.herokuapp.com/playlist/post', {
-          "uid": user.user.uid,
-          "Songs": songList
-      })
-
-      console.log(await res.data);
-      
+    saving = true
+    const res = await axios.post('https://moosik-backend.herokuapp.com/playlist/post', {
+        "uid": user.user.uid,
+        "Songs": songList
+    }).then(() => {
+      saving = false
+      saved = true
+    })
   }
 
   async function downloadList() {
@@ -212,6 +226,15 @@
       </div>
     </form>
   </div>
+  {#if GettingSong}
+  <h1 class="text-center">Getting song...</h1>
+  {/if}
+  {#if saving}
+  <h1 class="text-center">saving...</h1>
+  {/if}
+  {#if saved}
+  <h1 class="text-center"> saved! </h1>
+  {/if}
   {#each songList as song}
     <ProfileCard {...song} on:play={PlaySong} />
   {/each}
