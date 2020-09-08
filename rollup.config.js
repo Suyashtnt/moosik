@@ -9,6 +9,7 @@ import svelte from 'rollup-plugin-svelte';
 import { terser } from 'rollup-plugin-terser';
 import config from 'sapper/config/rollup.js';
 import sveltePreprocess from 'svelte-preprocess';
+import analyze from 'rollup-plugin-analyzer';
 
 import pkg from './package.json';
 
@@ -21,7 +22,7 @@ const onwarn = (warning, onwarn) =>
     /[/\\]@sapper[/\\]/.test(warning.message)) ||
   onwarn(warning);
 
-const dedupe = (importee) =>
+const dedupe = importee =>
   importee === 'svelte' || importee.startsWith('svelte/');
 
 const purgecss = require('@fullhuman/postcss-purgecss')({
@@ -29,13 +30,13 @@ const purgecss = require('@fullhuman/postcss-purgecss')({
   content: ['./src/**/*.html', './src/**/*.svelte', './src/**/*.css'],
 
   // Include any special characters you're using in this regular expression
-  defaultExtractor: (content) => content.match(/[A-Za-z0-9-_:/]+/g) || [],
+  defaultExtractor: content => content.match(/[A-Za-z0-9-_:/]+/g) || []
 });
 
 const preprocess = sveltePreprocess({
   postcss: {
-    plugins: [require('postcss-import')(), require('postcss-nested')()],
-  },
+    plugins: [require('postcss-import')(), require('postcss-nested')()]
+  }
 });
 
 export default {
@@ -45,7 +46,7 @@ export default {
     plugins: [
       replace({
         'process.browser': true,
-        'process.env.NODE_ENV': JSON.stringify(mode),
+        'process.env.NODE_ENV': JSON.stringify(mode)
       }),
       svelte({ preprocess, dev, hydratable: true, emitCss: true }),
       resolve({ browser: true, dedupe, mainFields: ['main'] }),
@@ -60,13 +61,14 @@ export default {
           presets: [['@babel/preset-env', { targets: '> 0.25%, not dead' }]],
           plugins: [
             '@babel/plugin-syntax-dynamic-import',
-            ['@babel/plugin-transform-runtime', { useESModules: true }],
-          ],
+            ['@babel/plugin-transform-runtime', { useESModules: true }]
+          ]
         }),
 
       !dev && terser({ module: true }),
+      analyze()
     ],
-    onwarn,
+    onwarn
   },
 
   server: {
@@ -75,7 +77,7 @@ export default {
     plugins: [
       replace({
         'process.browser': false,
-        'process.env.NODE_ENV': JSON.stringify(mode),
+        'process.env.NODE_ENV': JSON.stringify(mode)
       }),
       svelte({ preprocess, generate: 'ssr', dev }),
       postcss({
@@ -88,19 +90,19 @@ export default {
           // Do not purge the CSS in dev mode to be able to play with
           // classes in the browser dev-tools.
           !dev && purgecss,
-          !dev && require('cssnano')({ preset: 'default' }),
-        ].filter(Boolean),
+          !dev && require('cssnano')({ preset: 'default' })
+        ].filter(Boolean)
       }),
       resolve({ dedupe }),
       commonjs(),
       json(),
-      typescript(),
+      typescript()
     ],
     external: Object.keys(pkg.dependencies).concat(
       require('module').builtinModules ||
         Object.keys(process.binding('natives'))
     ),
-    onwarn,
+    onwarn
   },
 
   serviceworker: {
@@ -110,11 +112,12 @@ export default {
       resolve(),
       replace({
         'process.browser': true,
-        'process.env.NODE_ENV': JSON.stringify(mode),
+        'process.env.NODE_ENV': JSON.stringify(mode)
       }),
       commonjs(),
       !dev && terser(),
+      analyze()
     ],
-    onwarn,
-  },
+    onwarn
+  }
 };
