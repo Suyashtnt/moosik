@@ -1,44 +1,14 @@
 <script lang="ts">
- function youtube_parser(url){
-    var regExp = /^.*((youtu.be\/)|(v\/)|(\/u\/\w\/)|(embed\/)|(watch\?))\??v?=?([^#&?]*).*/;
-    var match = url.match(regExp);
-    return (match&&match[7].length==11)? match[7] : false;
-}
+  import {youtube_parser, getSongInfo, play, Audioifer} from './shared-code'
 
   var url;
-
-  async function getSongInfo(VideoURL:String) {
-
-    const id = youtube_parser(VideoURL)
-    console.log(id);
-    console.log(`https://www.yt-mp3s.com/@api/json/mp3/${id}`);
-    const res = await fetch(
-      `https://www.yt-mp3s.com/@api/json/mp3/${id}`,
-      {
-        method: "GET",
-        mode: 'cors',
-        headers: {}
-      }
-    );
-    const json = await res.json();
-    const parsedUrl = await json.vidInfo[0].dloadUrl;
-    const name = await json.vidTitle
-    const thumb = await json.vidThumb
-    const info = {parsedUrl,name,thumb,VideoURL}
-    console.log(info);
-    return info;
-  }
-
-  async function PlaySong(SongURL) {
-    const audio = new Audio(await SongURL);
-    await audio.play();
-  }
 
   var clicked = false;
 
   function itsClicked() {
     clicked = true
   }
+
 </script>
 
 <style lang="sass">
@@ -85,7 +55,7 @@ h1
     <h1>{value.name}</h1>
     <img class="rounded center" src={value.thumb} alt="thumbnail"/>
     <button
-      on:click={e => PlaySong(value.parsedUrl)}
+      on:click={e => play(Audioifer(value.parsedUrl))}
       class="bg-blue-600 hover:bg-gray-100 text-gray-800 font-semibold py-2 px-4
       border border-gray-400 rounded shadow btn-center text-center center2">
       play

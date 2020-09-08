@@ -4,8 +4,8 @@
   import type * as firebase from 'firebase/app';
   import { onMount } from 'svelte';
   import ProfileCard from '../components/ProfileCard.svelte';
+  import {youtube_parser, getSongInfo, play, Audioifer} from './shared-code'
 
-  //@ts-ignore
   let googleProvider;
   let user: firebase.auth.UserCredential;
   let currentlyAuthenticating: Boolean;
@@ -23,39 +23,6 @@
   var songList = [];
   var url;
 
-  async function getSongInfo(VideoURL) {
-    GettingSong = true
-    const id = youtube_parser(VideoURL);
-    console.log(id);
-    console.log(`https://www.yt-mp3s.com/@api/json/mp3/${id}`);
-
-
-    try {
-      const response = await fetch(`https://www.yt-mp3s.com/@api/json/mp3/${id}`, {
-      method: 'GET',
-      headers: {'Accept': 'application/json', }
-      })
-      const json = await response.json()
-      const parsedUrl = await json.vidInfo[0].dloadUrl;
-      const name = await json.vidTitle;
-      const thumb = await json.vidThumb;
-      const info = { parsedUrl, name, thumb, VideoURL };
-      GettingSong = false
-      console.log(info);
-      return info;
-    } catch (err) {
-      GettingSong = false
-      return err
-    }
-
-
-  }
-
-  async function PlaySong(Info) {
-    const audio = new Audio(await Info.detail.url);
-    await audio.play();
-  }
-
   async function addSong(URL: String) {
     URLList = [...URLList, URL] 
     var song = await getSongInfo(URL);
@@ -71,29 +38,6 @@
     }
   }
 
-  function play(element) {
-    return element.play().then(
-      () =>
-        new Promise((res, rej) => {
-          function ended() {
-            element.removeEventListener('error', error);
-            res();
-          }
-
-          function error() {
-            element.removeEventListener('ended', ended);
-            //@ts-ignore
-            rej(err);
-          }
-          element.addEventListener('ended', ended, {
-            once: true
-          });
-          element.addEventListener('error', error, {
-            once: true
-          });
-        })
-    );
-  }
 
   async function addSongList(element: String[]) {
     const promisesOfSongs = element.map(song => getSongInfo(song));
@@ -103,12 +47,6 @@
       songList = [...songList, songData[i]];
     }
     
-  }
-
-  function youtube_parser(url) {
-    var regExp = /^.*((youtu.be\/)|(v\/)|(\/u\/\w\/)|(embed\/)|(watch\?))\??v?=?([^#&?]*).*/;
-    var match = url.match(regExp);
-    return match && match[7].length == 11  ? match[7] : false;
   }
 
   async function login() {
@@ -265,7 +203,7 @@
   {/if}
 
   {#each songList as song}
-    <ProfileCard {...song} on:play={PlaySong} />
+    <ProfileCard {...song} />
   {/each}
 
 {:else if currentlyAuthenticating}

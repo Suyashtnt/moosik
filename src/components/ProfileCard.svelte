@@ -1,6 +1,6 @@
 <script>
   import { createEventDispatcher } from 'svelte';
-
+  import {play, Audioifer} from '../routes/shared-code'
   const dispatch = createEventDispatcher();
 
   export let name;
@@ -8,11 +8,6 @@
   export let thumb;
   export let VideoURL;
 
-  function play() {
-    dispatch('play', {
-      url: parsedUrl
-    });
-  }
 </script>
 
 <div
@@ -25,7 +20,7 @@
     <div class="text-center md:text-left">
       <h2 class="text-lg capitalize">{name}</h2>
       <div class="text-gray-600">{VideoURL}</div>
-      <button on:click={play} class="btn btn-primary mt-2">play</button>
+      <button on:click={play(Audioifer(parsedUrl))} class="btn btn-primary mt-2">play</button>
     </div>
   </div>
 </div>
