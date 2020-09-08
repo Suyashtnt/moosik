@@ -2,7 +2,6 @@
 	import type { APIResponse } from './api.interfaces';
   import * as cookies from '../cookiehandler'
   import type * as firebase from 'firebase/app';
-  import {default as axios} from 'axios';
   import { onMount } from 'svelte';
   import ProfileCard from '../components/ProfileCard.svelte';
 
@@ -36,11 +35,11 @@
 
 
     try {
-      const response = await axios.get(`https://www.yt-mp3s.com/@api/json/mp3/${id}`, {
+      const response = await fetch(`https://www.yt-mp3s.com/@api/json/mp3/${id}`, {
       method: 'GET',
       headers: {'Accept': 'application/json', }
       })
-      const json = await response.data
+      const json = await response.json()
       const parsedUrl = await json.vidInfo[0].dloadUrl;
       const name = await json.vidTitle;
       const thumb = await json.vidThumb;
@@ -113,7 +112,7 @@
   function youtube_parser(url) {
     var regExp = /^.*((youtu.be\/)|(v\/)|(\/u\/\w\/)|(embed\/)|(watch\?))\??v?=?([^#&?]*).*/;
     var match = url.match(regExp);
-    return match && match[7].length == 11 ? match[7] : false;
+    return match && match[7].length == 11  ? match[7] : false;
   }
 
   async function login() {
@@ -145,9 +144,12 @@
     console.log("updating...");
     errorSaving = false
     saving = true
-    const res = await axios.post('https://moosik-backend.herokuapp.com/playlist/post', {
-        "uid": user.user.uid,
-        "Songs": URLList
+    const res = await fetch('https://moosik-backend.herokuapp.com/playlist/post', {
+      method: "POST",
+        body: JSON.stringify({
+          "uid": user.user.uid,
+          "Songs": URLList
+        })
     }).then(() => {
       saving = false
       saved = true
@@ -162,14 +164,22 @@
     console.log("downloading " + JSON.stringify({
         uid: `${user.user.uid}`
       }));
-    const res = await axios.post('https://moosik-backend.herokuapp.com/playlist/get',
+
+    const res = await fetch('https://moosik-backend.herokuapp.com/playlist/get',
     {
-        uid: `${user.user.uid}`
+        method: "POST",
+        body: JSON.stringify({
+          "uid": user.user.uid
+        }),
+        headers: {
+          'Content-Type': 'application/json'
+        }
     })
-    const json = await res.data as APIResponse
-    console.log(json);
-    await addSongList(json.Songs)
-    DownloadingPlaylist = false
+    
+     const json = await res.json() as APIResponse
+     console.log(json)
+     await addSongList(json.Songs)
+     DownloadingPlaylist = false
   }
 </script>
 

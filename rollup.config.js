@@ -9,7 +9,7 @@ import svelte from 'rollup-plugin-svelte';
 import { terser } from 'rollup-plugin-terser';
 import config from 'sapper/config/rollup.js';
 import sveltePreprocess from 'svelte-preprocess';
-import analyze from 'rollup-plugin-analyzer';
+import visualizer from 'rollup-plugin-visualizer';
 
 import pkg from './package.json';
 
@@ -66,7 +66,7 @@ export default {
         }),
 
       !dev && terser({ module: true }),
-      analyze()
+      visualizer()
     ],
     onwarn
   },
@@ -115,8 +115,7 @@ export default {
         'process.env.NODE_ENV': JSON.stringify(mode)
       }),
       commonjs(),
-      !dev && terser(),
-      analyze()
+      !dev && terser()
     ],
     onwarn
   }
