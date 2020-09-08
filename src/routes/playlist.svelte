@@ -18,7 +18,7 @@
   let errorSaving: Boolean
   let ErrorWhileSaving: String
   let GettingSong: Boolean
-  let DownloadingPlaylist: Boolean
+  let DownloadingPlaylist: Boolean  
   onMount(() => {
     //@ts-ignore
     googleProvider = new firebase.auth.GoogleAuthProvider();
@@ -168,7 +168,7 @@
   padding: 10px
 .clearfix
   overflow: auto
-.title
+.title2
   font-size: 32px
 </style>
 
@@ -236,32 +236,34 @@
     </form>
   </div>
   {#if GettingSong}
-  <h1 class="text-center">Getting song...</h1>
-  {/if}
+  <h1 class="text-center title2">Getting song...</h1>
+  {/if }
   {#if errorSaving}
-  <h1>An error occured while saving: {ErrorWhileSaving}</h1>
+  <h1 class="text-center title2">An error occured while saving: {ErrorWhileSaving}</h1>
   {/if}
   {#if DownloadingPlaylist}
-  <h1>Downloading your playlist</h1>
+  <h1 class="text-center title2">Downloading your playlist</h1>
   {/if}
   {#if saving}
-  <h1 class="text-center">saving...</h1>
+  <h1 class="text-center title2">saving...</h1>
   {/if}
   {#if saved}
-  <h1 class="text-center"> saved! </h1>
+  <h1 class="text-center title2"> saved! </h1>
   {/if}
   {#each songList as song}
     <ProfileCard {...song} on:play={PlaySong} />
   {/each}
 
 {:else if currentlyAuthenticating}
-<h1>authenticating...</h1>
+<h1 class="text-center title2">authenticating...</h1>
 
 {:else}
 
 {#if erroredDuringAuth}
-  <h1>{authError}</h1>
+  <h1 class="text-center title2 mx-auto">{authError}</h1>
 {/if}
-<button on:click={login}>login</button>
+<button on:click={login}><p class="text-center title2 mx-auto">
+  login
+</p></button>
 
 {/if}
