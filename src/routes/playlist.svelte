@@ -235,21 +235,27 @@
       </div>
     </form>
   </div>
+
   {#if GettingSong}
-  <h1 class="text-center title2">Getting song...</h1>
+    <h1 class="text-center title2">Getting song...</h1>
   {/if }
+
   {#if errorSaving}
-  <h1 class="text-center title2">An error occured while saving: {ErrorWhileSaving}</h1>
+    <h1 class="text-center title2">An error occured while saving: {ErrorWhileSaving}</h1>
   {/if}
+
   {#if DownloadingPlaylist}
-  <h1 class="text-center title2">Downloading your playlist</h1>
+    <h1 class="text-center title2">Downloading your playlist</h1>
   {/if}
+
   {#if saving}
-  <h1 class="text-center title2">saving...</h1>
+    <h1 class="text-center title2">saving...</h1>
   {/if}
+
   {#if saved}
-  <h1 class="text-center title2"> saved! </h1>
+    <h1 class="text-center title2"> saved! </h1>
   {/if}
+  
   {#each songList as song}
     <ProfileCard {...song} on:play={PlaySong} />
   {/each}
