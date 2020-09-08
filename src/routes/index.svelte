@@ -49,11 +49,11 @@ h1
   text-transform: uppercase
   font-weight: 700
   margin: 0 0 0.5em 0
-.center 
+.center
   margin: auto
   width: 50%
   padding: 10px
-.center2 
+.center2
   margin: auto
   width: 75%
   padding: 10px
@@ -92,7 +92,7 @@ h1
     </button>
   </div>
 
-  
+
 {:catch error}
   <!-- getSong was rejected -->
 {/await}
@@ -110,7 +110,7 @@ h1
     </div>
     <button on:click={itsClicked} class="inline-block align-baseline font-bold text-sm text-blue-500 hover:text-blue-800">
 	Get song
-</button> 
+</button>
 
   </form>
 
