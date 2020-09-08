@@ -15,6 +15,8 @@
   let authError: String
   let saving: Boolean
   let saved: Boolean
+  let errorSaving: Boolean
+  let ErrorWhileSaving: String
   let GettingSong: Boolean
   let DownloadingPlaylist: Boolean
   onMount(() => {
@@ -129,6 +131,7 @@
 
   async function updateList() {
     console.log("updating...");
+    errorSaving = false
     saving = true
     const res = await axios.post('https://moosik-backend.herokuapp.com/playlist/post', {
         "uid": user.user.uid,
@@ -136,6 +139,9 @@
     }).then(() => {
       saving = false
       saved = true
+    }).catch((err) => {
+      errorSaving = true
+      ErrorWhileSaving = err
     })
   }
 
@@ -231,6 +237,9 @@
   </div>
   {#if GettingSong}
   <h1 class="text-center">Getting song...</h1>
+  {/if}
+  {#if errorSaving}
+  <h1>An error occured while saving: {ErrorWhileSaving}</h1>
   {/if}
   {#if DownloadingPlaylist}
   <h1>Downloading your playlist</h1>
