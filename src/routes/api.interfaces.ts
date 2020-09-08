@@ -3,14 +3,6 @@
 export interface APIResponse {
     _id:   string;
     uid:   string;
-    Songs: Song[];
+    Songs: string[];
     __v:   number;
-}
-
-export interface Song {
-    _id:       string;
-    parsedUrl: string;
-    name:      string;
-    thumb:     string;
-    VideoURL:  string;
 }

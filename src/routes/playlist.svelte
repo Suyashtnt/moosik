@@ -19,6 +19,7 @@
   let ErrorWhileSaving: String
   let GettingSong: Boolean
   let DownloadingPlaylist: Boolean
+  let URLList: String[] = []
   onMount(() => {
     //@ts-ignore
     googleProvider = new firebase.auth.GoogleAuthProvider();
@@ -37,7 +38,7 @@
     try {
       const response = await axios.get(`https://www.yt-mp3s.com/@api/json/mp3/${id}`, {
       method: 'GET',
-      headers: {}
+      headers: {'Accept': 'application/json', }
       })
       const json = await response.data
       const parsedUrl = await json.vidInfo[0].dloadUrl;
@@ -60,7 +61,8 @@
     await audio.play();
   }
 
-  async function addSong(URL) {
+  async function addSong(URL: String) {
+    URLList = [...URLList, URL] 
     var song = await getSongInfo(URL);
 
     songList = [...songList, await song];
@@ -96,6 +98,16 @@
           });
         })
     );
+  }
+
+  async function addSongList(element: String[]) {
+    const promisesOfSongs = element.map(song => getSongInfo(song));
+    const songData = await Promise.all(promisesOfSongs);
+    for (let i = 0; i < promisesOfSongs.length; i++) {
+      console.log(songData[i]);
+      songList = [...songList, songData[i]];
+    }
+    
   }
 
   function youtube_parser(url) {
@@ -135,7 +147,7 @@
     saving = true
     const res = await axios.post('https://moosik-backend.herokuapp.com/playlist/post', {
         "uid": user.user.uid,
-        "Songs": songList
+        "Songs": URLList
     }).then(() => {
       saving = false
       saved = true
@@ -156,8 +168,8 @@
     })
     const json = await res.data as APIResponse
     console.log(json);
+    await addSongList(json.Songs)
     DownloadingPlaylist = false
-    songList = json.Songs
   }
 </script>
 
@@ -211,7 +223,7 @@
             updateList();
           }}
           class="btn btn-primary mt-2">
-          Update List
+          Update online list
         </button>
 
         <button
@@ -220,7 +232,7 @@
           downloadList();
         }}
         class="btn btn-primary mt-2">
-        download list
+        download online list
         </button>
 
         <button
