@@ -95,8 +95,7 @@ jobs:
        run: |
          sudo apt-get update
          sudo apt-get install -y webkit2gtk-4.0
-          - name: Get yarn cache directory path
-       
+          - name: Get yarn cache directory path  
       id: yarn-cache-dir-path
       run: echo "::set-output name=dir::$(yarn config get cacheFolder)"
 
