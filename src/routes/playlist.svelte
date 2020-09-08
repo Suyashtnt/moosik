@@ -150,7 +150,7 @@
     console.log("downloading " + JSON.stringify({
         uid: `${user.user.uid}`
       }));
-    const res = await axios.post('http://moosik-backend.herokuapp.com/playlist/get',
+    const res = await axios.post('https://moosik-backend.herokuapp.com/playlist/get',
     {
         uid: `${user.user.uid}`
     })
