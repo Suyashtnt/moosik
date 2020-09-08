@@ -6,16 +6,12 @@
   import ProfileCard from '../components/ProfileCard.svelte';
 
   //@ts-ignore
-  let db:firebase.firestore.Firestore;
   let googleProvider;
   let user: firebase.auth.UserCredential;
   let currentlyAuthenticating: Boolean;
-  let erroredDuringAuth: Boolean
   let authError: String
   let saving: Boolean
   let saved: Boolean
-  let errorSaving: Boolean
-  let ErrorWhileSaving: String
   let GettingSong: Boolean
   let DownloadingPlaylist: Boolean
   let URLList: String[] = []
@@ -118,21 +114,19 @@
   async function login() {
 
         try {
+          authError = null
           currentlyAuthenticating = true
-          erroredDuringAuth = false
           //@ts-ignore
             firebase.auth().signInWithPopup(googleProvider).then((res) => {
                 console.log(res);
                 user = res
                 cookies.setCookie("userID", res.user.uid, 100000)
             }).then(() => currentlyAuthenticating = false).catch((err) => {
-              erroredDuringAuth = true
               currentlyAuthenticating = false
               authError = err
             });
         } catch(e) {
           currentlyAuthenticating = false
-          erroredDuringAuth = true
             let message = e.message || e;
             console.log("Something went wrong:", message);
             authError = message
@@ -142,7 +136,6 @@
 
   async function updateList() {
     console.log("updating...");
-    errorSaving = false
     saving = true
     const res = await fetch('https://moosik-backend.herokuapp.com/playlist/post', {
       method: "POST",
@@ -153,16 +146,13 @@
     }).then(() => {
       saving = false
       saved = true
-    }).catch((err) => {
-      errorSaving = true
-      ErrorWhileSaving = err
     })
   }
 
   async function downloadList() {
     DownloadingPlaylist = true
     console.log("downloading " + JSON.stringify({
-        uid: `${user.user.uid}`
+        uid: user.user.uid
       }));
 
     const res = await fetch('https://moosik-backend.herokuapp.com/playlist/get',
@@ -262,10 +252,6 @@
     <h1 class="text-center title2">Getting song...</h1>
   {/if }
 
-  {#if errorSaving}
-    <h1 class="text-center title2">An error occured while saving: {ErrorWhileSaving}</h1>
-  {/if}
-
   {#if DownloadingPlaylist}
     <h1 class="text-center title2">Downloading your playlist</h1>
   {/if}
@@ -275,7 +261,7 @@
   {/if}
 
   {#if saved}
-    <h1 class="text-center title2"> saved! </h1>
+    <h1 class="text-center title2">saved!</h1>
   {/if}
 
   {#each songList as song}
@@ -287,7 +273,7 @@
 
 {:else}
 
-{#if erroredDuringAuth}
+{#if authError}
   <h1 class="text-center title2 mx-auto">{authError}</h1>
 {/if}
 <button on:click={login}><p class="text-center title2 mx-auto">
