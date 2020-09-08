@@ -1,4 +1,5 @@
 <script lang="ts">
+	import type { APIResponse } from './api.interfaces';
   import * as cookies from '../cookiehandler'
   import type * as firebase from 'firebase/app';
   import {default as axios} from 'axios';
@@ -36,7 +37,7 @@
       method: 'GET',
       headers: {}
       })
-      const json = await response.data  
+      const json = await response.data
       const parsedUrl = await json.vidInfo[0].dloadUrl;
       const name = await json.vidTitle;
       const thumb = await json.vidThumb;
@@ -147,10 +148,10 @@
     {
         uid: `${user.user.uid}`
     })
-    const json = await res.data 
-    console.log(await json);
+    const json = await res.data as APIResponse
+    console.log(json);
     DownloadingPlaylist = false
-    songList = await json.Songs
+    songList = json.Songs
   }
 </script>
 

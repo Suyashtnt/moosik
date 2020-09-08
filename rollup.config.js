@@ -5,6 +5,7 @@ import resolve from 'rollup-plugin-node-resolve';
 import postcss from 'rollup-plugin-postcss';
 import replace from 'rollup-plugin-replace';
 import svelte from 'rollup-plugin-svelte';
+import typescript from '@rollup/plugin-typescript';
 import { terser } from 'rollup-plugin-terser';
 import config from 'sapper/config/rollup.js';
 import pkg from './package.json';
@@ -57,7 +58,7 @@ export default {
       }),
       commonjs(),
       json(),
-
+      typescript(),
       legacy &&
         babel({
           extensions: ['.js', '.mjs', '.html', '.svelte'],
@@ -122,7 +123,8 @@ export default {
         dedupe
       }),
       commonjs(),
-      json()
+      json(),
+      typescript()
     ],
     external: Object.keys(pkg.dependencies).concat(
       require('module').builtinModules ||
