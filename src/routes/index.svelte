@@ -1,4 +1,4 @@
-<script>
+<script lang="ts">
  function youtube_parser(url){
     var regExp = /^.*((youtu.be\/)|(v\/)|(\/u\/\w\/)|(embed\/)|(watch\?))\??v?=?([^#&?]*).*/;
     var match = url.match(regExp);
@@ -7,7 +7,7 @@
 
   var url;
 
-  async function getSongInfo(VideoURL) {
+  async function getSongInfo(VideoURL:String) {
 
     const id = youtube_parser(VideoURL)
     console.log(id);

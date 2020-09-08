@@ -1,7 +1,8 @@
 <script lang="ts">
   import * as cookies from '../cookiehandler'
-	import type * as firebase from 'firebase/app';
-import { onMount } from 'svelte';
+  import type * as firebase from 'firebase/app';
+  import {default as axios} from 'axios';
+  import { onMount } from 'svelte';
   import ProfileCard from '../components/ProfileCard.svelte';
 
   //@ts-ignore
@@ -10,24 +11,21 @@ import { onMount } from 'svelte';
   let user: firebase.auth.UserCredential
   onMount(() => {
     //@ts-ignore
-    db = firebase.firestore();
-    //@ts-ignore
     googleProvider = new firebase.auth.GoogleAuthProvider();
   })
 
   var songList = [];
-  var url;
+  var url;  
 
   async function getSongInfo(VideoURL) {
     const id = youtube_parser(VideoURL);
     console.log(id);
     console.log(`https://www.yt-mp3s.com/@api/json/mp3/${id}`);
-    const res = await fetch(`https://www.yt-mp3s.com/@api/json/mp3/${id}`, {
+    const response = await axios.get(`https://www.yt-mp3s.com/@api/json/mp3/${id}`, {
       method: 'GET',
-      mode: 'cors',
       headers: {}
-    });
-    const json = await res.json();
+    })
+    const json = await response.data
     const parsedUrl = await json.vidInfo[0].dloadUrl;
     const name = await json.vidTitle;
     const thumb = await json.vidThumb;
@@ -99,20 +97,33 @@ import { onMount } from 'svelte';
             console.log("Something went wrong:", message);
         }
       
-    }
+  }
 
-    async function updateList() {
-      console.log("updating...");
-      
-      db.collection("playlists").doc(user.user.uid).set({
-        Songs: songList
-      }).then((docRef) => {
-    console.log("Document written with ID:");
+  async function updateList() {
+    console.log("updating...");
+    
+      const res = await axios.post('https://moosik-backend.herokuapp.com/playlist/post', {
+          "uid": user.user.uid,
+          "Songs": songList
       })
-      .catch(function(error) {
-          console.error("Error adding document: ", error);
-      });
-    }
+
+      console.log(await res.data);
+      
+  }
+
+  async function downloadList() {
+    console.log("downloading" + JSON.stringify({
+        uid: `${user.user.uid}`
+      }));
+    const res = await axios.post('http://moosik-backend.herokuapp.com/playlist/get',
+    {
+        uid: `${user.user.uid}`
+    })
+    const json = await res.data 
+    console.log(await json);
+    songList = await json.Songs
+
+  }
 </script>
 
 <style lang="sass">
@@ -122,7 +133,8 @@ import { onMount } from 'svelte';
   padding: 10px
 .clearfix
   overflow: auto
-
+.title
+  font-size: 32px
 </style>
 
 <svelte:head>
@@ -130,7 +142,8 @@ import { onMount } from 'svelte';
 </svelte:head>
 
 {#if user}
-<h1>{user.user.uid}</h1>
+<img src={user.user.photoURL} alt="your profile pic" class="rounded-full mx-auto mt-6 w-20 h-20 " />
+<h1 class="text-center text-lg title mx-auto mt-2">{user.user.displayName}</h1>
 <div class="w-full center clearfix">
   <form class="bg-white shadow-md clearfix rounded px-8 pt-6 pb-8 mb-4">
     <div class="mb-4">
@@ -145,30 +158,46 @@ import { onMount } from 'svelte';
         type="text"
         placeholder="Youtube Video URL" />
     </div>
-    <button
+
+    <div class="justify-evenly items-center content-center self-center">
+
+      <button
+        on:click={e => {
+          e.preventDefault();
+          addSong(url);
+        }}
+        class="btn btn-primary mt-2">
+        Add to playlist
+      </button>
+
+      <button
+        on:click={e => {
+          e.preventDefault();
+          updateList();
+        }}
+        class="btn btn-primary mt-2">
+        Update List
+      </button>
+
+      <button
       on:click={e => {
         e.preventDefault();
-        addSong(url);
+        downloadList();
       }}
-      class="btn btn-primary mt-2 float-left">
-      Add to playlist
-    </button>
-    <button
-      on:click={e => {
-        e.preventDefault();
-        updateList();
-      }}
-      class="btn btn-primary mt-2 float-left">
-      Update List
-    </button>
-    <button
-      on:click={e => {
-        e.preventDefault();
-        PlayAll();
-      }}
-      class="btn btn-primary mt-2 float-right">
-      Play all
-    </button>
+      class="btn btn-primary mt-2">
+      download list
+      </button>
+
+      <button
+        on:click={e => {
+          e.preventDefault();
+          PlayAll();
+        }}
+        class="btn btn-primary mt-2">
+        Play all
+      </button>
+
+    </div>
   </form>
 </div>
 {#each songList as song}
