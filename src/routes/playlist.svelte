@@ -109,15 +109,23 @@
   }
 </script>
 
-<style lang="sass">
-.center
-  margin: auto
-  width: 70%
-  padding: 10px
-.clearfix
-  overflow: auto
-.title2
-  font-size: 32px
+<style lang="postcss">
+.center {
+  margin: auto;
+  width: 70%;
+  padding: 10px;
+}
+.clearfix {
+  overflow: auto;
+}
+.title2 {
+  font-size: 32px;
+  @apply text-center;
+}
+.title {
+  font-size: 32px;
+  @apply mx-auto mt-2 text-center;
+}
 </style>
 
 <svelte:head>
@@ -126,7 +134,7 @@
 
 {#if user}
   <img src={user.user.photoURL} alt="your profile pic" class="rounded-full mx-auto mt-6 w-20 h-20 " />
-  <h1 class="text-center text-lg title mx-auto mt-2">{user.user.displayName}</h1>
+  <h1 class="title">{user.user.displayName}</h1>
   <div class="w-full center clearfix">
     <form class="bg-white shadow-md clearfix rounded px-8 pt-6 pb-8 mb-4">
       <div class="mb-4">
@@ -185,7 +193,7 @@
   </div>
 
   {#if state}
-  <h1 class="text-center title2">{state}</h1>
+  <h1 class="title2">{state}</h1>
   {/if}
 
   {#each songList as song}
@@ -194,13 +202,13 @@
 
 
 {:else if currentlyAuthenticating}
-<h1 class="text-center title2">authenticating...</h1>
+<h1 class="title2">authenticating...</h1>
 {:else}
 
 {#if authError}
-  <h1 class="text-center title2 mx-auto">{authError}</h1>
+  <h1 class="title2 mx-auto">{authError}</h1>
 {/if}
-<button on:click={login}><p class="text-center title2 mx-auto">
+<button on:click={login}><p class="title2 mx-auto">
   login
 </p></button>
 

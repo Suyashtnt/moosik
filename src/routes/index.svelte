@@ -11,31 +11,26 @@
 
 </script>
 
-<style lang="sass">
-h1
-  text-align: center
-  margin: 0 auto
-  font-size: 2.8em
-  text-transform: uppercase
-  font-weight: 700
-  margin: 0 0 0.5em 0
-.center
-  margin: auto
-  width: 50%
-  padding: 10px
-.center2
-  margin: auto
-  width: 75%
-  padding: 10px
-  position: relative
-  right: -100px
+<style lang="postcss">
+h1 {
+  text-align: center;
+  margin: 0 auto;
+  font-size: 2.8em;
+  text-transform: uppercase;
+  font-weight: 700;
+  margin: 0 0 0.5em 0;
 
-@media (min-width: 480px)
-  h1
-    font-size: 4em
-
-
-
+  @media (min-width: 480px) {
+    font-size: 4em;
+  }
+}
+.centered {
+  @apply flex justify-center items-center;
+  margin: auto;
+  width: 75%;
+  padding: 10px;
+  position: relative;
+}
 </style>
 
 <svelte:head>
@@ -70,15 +65,15 @@ h1
 {:else}
 
 
-<div class="w-full max-w-xs center">
+<div class="centered">
   <form class="bg-white shadow-md rounded px-8 pt-6 pb-8 mb-4">
     <div class="mb-4">
-      <label class="block text-gray-700 text-sm font-bold mb-2" for="username">
+      <label class="block text-gray-700 text-md font-bold mb-2" for="username">
         URL
       </label>
       <input bind:value={url} class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" id="username" type="text" placeholder="Youtube Video URL">
     </div>
-    <button on:click={itsClicked} class="inline-block align-baseline font-bold text-sm text-blue-500 hover:text-blue-800">
+    <button on:click={itsClicked} class="inline-block align-baseline font-bold text-sm hover:text-md text-blue-500 hover:text-blue-800 mx-auto">
 	Get song
 </button>
 
