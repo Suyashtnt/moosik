@@ -1,13 +1,14 @@
 <script lang="ts">
+  import Title2 from '../components/title2.svelte';
+  import Title1 from '../components/title.svelte'
 	import type { APIResponse } from './api.interfaces';
-  import * as cookies from '../cookiehandler'
   import type * as firebase from 'firebase/app';
   import { onMount } from 'svelte';
   import ProfileCard from '../components/ProfileCard.svelte';
   import {youtube_parser, getSongInfo, play, Audioifer} from './shared-code'
 
   let googleProvider;
-  let user: firebase.auth.UserCredential;
+  let user: any;
   let currentlyAuthenticating: Boolean;
   let authError: String
   let state: String
@@ -27,7 +28,6 @@
 
     songList = [...songList, await song];
     state = null
-    console.log(songList);
   }
 
   async function PlayAll() {
@@ -41,10 +41,10 @@
   async function addSongList(element: String[]) {
     const promisesOfSongs = element.map(song => getSongInfo(song));
     const songData = await Promise.all(promisesOfSongs);
-    for (let i = 0; i < promisesOfSongs.length; i++) {
-      console.log(songData[i]);
+    for (let i = 0; i < songData.length; i++) {
       songList = [...songList, songData[i]];
     }
+    
     
   }
 
@@ -55,9 +55,7 @@
           currentlyAuthenticating = true
           //@ts-ignore
             firebase.auth().signInWithPopup(googleProvider).then((res) => {
-                console.log(res);
                 user = res
-                cookies.setCookie("userID", res.user.uid, 100000)
             }).then(() => currentlyAuthenticating = false).catch((err) => {
               currentlyAuthenticating = false
               authError = err
@@ -65,14 +63,12 @@
         } catch(e) {
           currentlyAuthenticating = false
             let message = e.message || e;
-            console.log("Something went wrong:", message);
             authError = message
         }
 
   }
 
   async function updateList() {
-    console.log("updating...");
      state = "saving"
     const res = await fetch('https://moosik-backend.herokuapp.com/playlist/post', {
       method: "POST",
@@ -87,9 +83,6 @@
 
   async function downloadList() {
     state = "downloading Playlist..."
-    console.log("downloading " + JSON.stringify({
-        uid: user.user.uid
-      }));
 
     const res = await fetch('https://moosik-backend.herokuapp.com/playlist/get',
     {
@@ -103,28 +96,26 @@
     })
     
      const json = await res.json() as APIResponse
-     console.log(json)
      await addSongList(json.Songs)
      state = null
   }
 </script>
 
 <style lang="postcss">
-.center {
-  margin: auto;
-  width: 70%;
-  padding: 10px;
-}
 .clearfix {
   overflow: auto;
 }
+
 .title2 {
   font-size: 32px;
   @apply text-center;
 }
-.title {
-  font-size: 32px;
-  @apply mx-auto mt-2 text-center;
+.main-div {
+  @apply flex justify-center items-center;
+  margin: auto;
+  width: 90%;
+  padding: 10px;
+  position: relative;
 }
 </style>
 
@@ -134,11 +125,11 @@
 
 {#if user}
   <img src={user.user.photoURL} alt="your profile pic" class="rounded-full mx-auto mt-6 w-20 h-20 " />
-  <h1 class="title">{user.user.displayName}</h1>
-  <div class="w-full center clearfix">
-    <form class="bg-white shadow-md clearfix rounded px-8 pt-6 pb-8 mb-4">
+  <Title1 content={user.user.displayName} />
+  <div class="w-full clearfix ">
+    <form class="bg-white shadow-md clearfix rounded px-8 pt-6 pb-8 mb-4 main-div">
       <div class="mb-4">
-        <label class="block text-gray-700 text-sm font-bold mb-2" for="username">
+        <label class="block text-gray-700 text-lg font-bold mb-2" for="username">
           URL
         </label>
         <input
@@ -150,7 +141,7 @@
           placeholder="Youtube Video URL" />
       </div>
 
-      <div class="justify-evenly items-center content-center self-center">
+      <div class="flex justify-evenly mx-auto">
 
         <button
           on:click={e => {
@@ -193,7 +184,7 @@
   </div>
 
   {#if state}
-  <h1 class="title2">{state}</h1>
+  <Title2 content={state} />
   {/if}
 
   {#each songList as song}
@@ -202,14 +193,14 @@
 
 
 {:else if currentlyAuthenticating}
-<h1 class="title2">authenticating...</h1>
+<Title2 content={'authenticating...'}></Title2>
 {:else}
 
 {#if authError}
-  <h1 class="title2 mx-auto">{authError}</h1>
+  <Title2 content={authError}/>
 {/if}
-<button on:click={login}><p class="title2 mx-auto">
+<button class="title2 mx-auto self-center" on:click={login}>
   login
-</p></button>
+</button>
 
 {/if}
