@@ -3,9 +3,7 @@ let plugins = [
 	require('postcss-nested')({}),
 	require('autoprefixer')({}),
 	require('precss')({}),
-	require('tailwindcss')()
+	require('tailwindcss')(),
 ];
 
-module.exports = {
-	plugins
-};
+module.exports = { plugins };
