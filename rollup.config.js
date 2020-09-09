@@ -1,10 +1,10 @@
 import typescript from '@rollup/plugin-typescript';
-import babel from 'rollup-plugin-babel';
-import commonjs from 'rollup-plugin-commonjs';
-import json from 'rollup-plugin-json';
-import resolve from 'rollup-plugin-node-resolve';
+import babel from '@rollup/plugin-babel';
+import commonjs from '@rollup/plugin-commonjs';
+import json from '@rollup/plugin-json';
+import resolve from '@rollup/plugin-node-resolve';
 import postcss from 'rollup-plugin-postcss';
-import replace from 'rollup-plugin-replace';
+import replace from '@rollup/plugin-replace';
 import svelte from 'rollup-plugin-svelte';
 import { terser } from 'rollup-plugin-terser';
 import config from 'sapper/config/rollup.js';
@@ -12,7 +12,6 @@ import sveltePreprocess from 'svelte-preprocess';
 import visualizer from 'rollup-plugin-visualizer';
 const plugins = require('./postcss.config').plugins;
 import pkg from './package.json';
-import strip from '@rollup/plugin-strip';
 
 const mode = process.env.NODE_ENV;
 const dev = mode === 'development';
@@ -36,7 +35,7 @@ const purgecss = require('@fullhuman/postcss-purgecss')({
 
 const preprocess = sveltePreprocess({
 	postcss: {
-		plugins
+		plugins: plugins
 	}
 });
 
@@ -58,7 +57,7 @@ export default {
 			legacy &&
 				babel({
 					extensions: ['.js', '.mjs', '.html', '.svelte'],
-					runtimeHelpers: true,
+					babelHelpers: 'runtime',
 					exclude: ['node_modules/@babel/**'],
 					presets: [['@babel/preset-env', { targets: '> 0.25%, not dead' }]],
 					plugins: [
@@ -68,8 +67,7 @@ export default {
 				}),
 
 			!dev && terser({ module: true }),
-			visualizer(),
-			strip({})
+			visualizer()
 		],
 		onwarn
 	},
@@ -99,8 +97,7 @@ export default {
 			resolve({ dedupe }),
 			commonjs(),
 			json(),
-			typescript(),
-			strip({})
+			typescript()
 		],
 		external: Object.keys(pkg.dependencies).concat(
 			require('module').builtinModules ||
